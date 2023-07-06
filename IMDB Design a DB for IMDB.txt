@@ -1,0 +1,69 @@
+ MongoDB database for the IMDB scenario
+
+1. Movies:
+   - _id: unique identifier for the movie
+   - title: movie title
+   - media: array of media objects containing video or image information (each object can have fields like type, URL, description, etc.)
+   - genres: array of genre names that the movie belongs to
+   - reviews: array of review objects
+   - artists: array of artist objects
+
+2. Users:
+   - _id: unique identifier for the user
+   - name: user's name
+
+
+3. Reviews:
+   - _id: unique identifier for the review
+   - movie_id: reference to the movie the review belongs to
+   - user_id: reference to the user who wrote the review
+   - rating: rating given by the user
+   - comment: textual comment provided by the user
+
+4. Artists:
+   - _id: unique identifier for the artist
+   - name: artist's name
+   - skills: array of skills possessed by the artist
+   - movies: array of movie objects where the artist performed a role
+
+Each movie object in the movies array of the Artist collection can have fields like movie_id and role, specifying the movie the artist performed in and the role they played.
+
+Here are MongoDB queries based on the design:
+
+1. Query to retrieve all movies belonging to a specific genre:
+   
+   db.Movies.find({ genres: "Action" })
+
+
+2. Query to retrieve all movies with their associated media:
+ 
+   db.Movies.find().forEach(function(movie) {
+       var media = db.Media.find({ movie_id: movie._id });
+       movie.media = media.toArray();
+       printjson(movie);
+   });
+ 
+
+3. Query to retrieve all reviews for a specific movie:
+
+   db.Reviews.find({ movie_id: "movie_id_here" })
+
+
+4. Query to retrieve all movies a user has reviewed:
+
+   db.Reviews.find({ user_id: "user_id_here" }).forEach(function(review) {
+       var movie = db.Movies.findOne({ _id: review.movie_id });
+       review.movie = movie;
+       printjson(review);
+   });
+
+
+5. Query to retrieve all movies in which an artist performed a specific role:
+
+   db.Artists.find({ role: "actor" }).forEach(function(artist) {
+       var movies = db.Movies.find({ "artists._id": artist._id });
+       artist.movies = movies.toArray();
+       printjson(artist);
+   });
+
+
